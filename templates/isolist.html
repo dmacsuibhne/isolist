@@ -1,8 +1,36 @@
 <!doctype html>
 <head>
   <title>Donn's ISOList</title>
-  <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+  <link rel="icon" type="image/ico" href="http://10.44.86.30/isolist/2.x/favicon.ico" />
+  <style type="text/css">
+  html, body { min-width:1200px; width:100%; height:100%; margin:0; padding:0; }
+  body { color:#000; background:#FFF; font:83% sans-serif; text-align:center; }
+  #body-wrap { width:100%; }
+  a { color:#00F; }
+  th { text-align:center; background-color:#FFF; }
+  th, td { border:1px solid #CCC; min-width:100px;}
+  table { margin:0; padding:0; border-collapse:collapse; font-size:100%; overflow:hidden;}
+  
+        #hdr_tab { position:fixed; left:0; top:0; z-index:100; width:100%; }
+  #hdr_tab { border-bottom:1px solid #999; }
+
+        #body_tab { width:100%;}
+  #body_tab tr.highlight td.filename { background-color:#F3F3F3; }
+  #body_tab td.ok { background-color:#D9FFD9; }
+  #body_tab td.nok { background-color:#FFD9D9; }
+  #body_tab td { cursor:default; }
+  #body_tab td.editing { outline:2px solid #FF3300 !important; }
+  #body_tab td textarea { width:100%; margin:0; padding:0; border:none; resize:none; font:inherit; }
+        #body_tab div { padding-top:3px; padding-bottom:3px; }
+
+
+  #tmp_message { position:fixed; text-align:center; top:50%; width:100%; height:100px; line-height:100px; z-index:200; cursor:default; opacity:0.33; }
+  #tmp_message_inner { position:absolute; top:-50px; width:100%; font-size:500%; }
+  #tmp_message_text { color:#000; background:#FFF; padding:10px; }
+  #tmp_message .mark { font-size:150%; vertical-align:middle; }
+  </style>
 </head>
+
 <body>
 
   <h1>ISOList</h1>
@@ -13,13 +41,43 @@
   {% endfor %}
   
   <table>
-    {% for root in root_dict %}
+    <tr>
+      <th>File name</th>
+      <th>Last mod</th>
+      <th>Sprint</th>
+      <th>OS Patches</th>
+      <th>VCDB</th>
+      <th>PCDB</th>
+      <th>UVCDB</th>
+      <th>UPCDB</th>
+      <th>EXPCDB</th>
+      <th>ECDB</th>
+      <th>STCDB</th>
+      <th>DTMT</th>
+      <th>Comment</th>
+
+
+    </tr>
+    {% for iso in iso_list %}
       <tr>
-      <td>{{root.tag}}</td>
+      <td>{{iso.find('file_name').text}}</td>
+      <td>{{iso.find('last_mod').text}}</td>
+      <td contenteditable="true">{{iso.find('sprint').text}}</td>
+      <td contenteditable="true">{{iso.find('ospatches').text}}</td>
+      <td contenteditable="true">{{iso.find('vcdb').text}}</td>
+      <td contenteditable="true">{{iso.find('pcdb').text}}</td>
+      <td contenteditable="true">{{iso.find('uvcdb').text}}</td>
+      <td contenteditable="true">{{iso.find('upcdb').text}}</td>
+      <td contenteditable="true">{{iso.find('expcdb').text}}</td>
+      <td contenteditable="true">{{iso.find('ecdb').text}}</td>
+      <td contenteditable="true">{{iso.find('stcdb').text}}</td>
+      <td contenteditable="true">{{iso.find('dtmt').text}}</td>
+      <td contenteditable="true">{{iso.find('comment').text}}</td>
       
       </tr>
     {% endfor %}
   </table>
+
 
 
 </body>
