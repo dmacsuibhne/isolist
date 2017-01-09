@@ -2,48 +2,17 @@
 <head>
   <title>Donn's ISOList</title>
   <link rel="icon" type="image/ico" href="http://10.44.86.30/isolist/2.x/favicon.ico" />
-  <style type="text/css">
-  html, body { min-width:1200px; width:100%; height:100%; margin:0; padding:0; }
-  body { color:#000; background:#FFF; font:83% sans-serif; text-align:center; }
-  #body-wrap { width:100%; }
-  a { color:#00F; }
-  th { text-align:center; background-color:#FFF; }
-  th, td { border:1px solid #CCC; min-width:100px;}
-  table { margin:0; padding:0; border-collapse:collapse; font-size:100%; overflow:hidden;}
-  
-        #hdr_tab { position:fixed; left:0; top:0; z-index:100; width:100%; }
-  #hdr_tab { border-bottom:1px solid #999; }
-
-        #body_tab { width:100%;}
-  #body_tab tr.highlight td.filename { background-color:#F3F3F3; }
-  #body_tab td.ok { background-color:#D9FFD9; }
-  #body_tab td.nok { background-color:#FFD9D9; }
-  #body_tab td { cursor:default; }
-  #body_tab td.editing { outline:2px solid #FF3300 !important; }
-  #body_tab td textarea { width:100%; margin:0; padding:0; border:none; resize:none; font:inherit; }
-        #body_tab div { padding-top:3px; padding-bottom:3px; }
-
-
-  #tmp_message { position:fixed; text-align:center; top:50%; width:100%; height:100px; line-height:100px; z-index:200; cursor:default; opacity:0.33; }
-  #tmp_message_inner { position:absolute; top:-50px; width:100%; font-size:500%; }
-  #tmp_message_text { color:#000; background:#FFF; padding:10px; }
-  #tmp_message .mark { font-size:150%; vertical-align:middle; }
-  </style>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="{{ url_for('static', filename='isolist.js') }}"></script> 
 </head>
 
-<body>
-
-  <h1>ISOList</h1>
-
-
-  {% for message in get_flashed_messages() %}
-    <div class=flash>{{ message }}</div>
-  {% endfor %}
-  
-  <table>
+<body onload="colour_all()" id="body-wrap">
+ 
+  <table id="body_tab">
     <tr>
       <th>File name</th>
-      <th>Last mod</th>
+      <th>Mirror</th>
+      <th>Last modified</th>
       <th>Sprint</th>
       <th>OS Patches</th>
       <th>VCDB</th>
@@ -55,28 +24,83 @@
       <th>STCDB</th>
       <th>DTMT</th>
       <th>Comment</th>
-
-
     </tr>
+
     {% for iso in iso_list %}
-      <tr>
-      <td>{{iso.find('file_name').text}}</td>
+      <tr class="{{iso.find('file_name').text}}">
+      <td>{{Isolist.link_from_30(iso.find('file_name').text)}}</td>
+      <td>
+        <a href="https://arm101-eiffel004.lmera.ericsson.se:8443/nexus/service/local/artifact/maven/redirect?r=litp_releases&g=com.ericsson.nms.litp&a=ERIClitp_CXP9024296&v={{Isolist.get_version(iso.find('file_name').text)}}&e=iso">
+          {{Isolist.get_version(iso.find('file_name').text)}}
+        </a>
+      </td>
       <td>{{iso.find('last_mod').text}}</td>
-      <td contenteditable="true">{{iso.find('sprint').text}}</td>
-      <td contenteditable="true">{{iso.find('ospatches').text}}</td>
-      <td contenteditable="true">{{iso.find('vcdb').text}}</td>
-      <td contenteditable="true">{{iso.find('pcdb').text}}</td>
-      <td contenteditable="true">{{iso.find('uvcdb').text}}</td>
-      <td contenteditable="true">{{iso.find('upcdb').text}}</td>
-      <td contenteditable="true">{{iso.find('expcdb').text}}</td>
-      <td contenteditable="true">{{iso.find('ecdb').text}}</td>
-      <td contenteditable="true">{{iso.find('stcdb').text}}</td>
-      <td contenteditable="true">{{iso.find('dtmt').text}}</td>
-      <td contenteditable="true">{{iso.find('comment').text}}</td>
+      <td contenteditable="true" 
+          id="{{'{0}_{1}'.format(iso.find('file_name').text, 'sprint')}}"
+          onblur="save_tag(this.id)"
+          class="sprint"
+      >{{Isolist.hide_none(iso.find('sprint').text)}}</td>
+      <td contenteditable="true" 
+          id="{{'{0}_{1}'.format(iso.find('file_name').text, 'ospatches')}}"
+          onblur="save_tag(this.id)"
+          class="ospatches"
+      >{{Isolist.hide_none(iso.find('ospatches').text)}}</td>
+      <td contenteditable="true" 
+          id="{{'{0}_{1}'.format(iso.find('file_name').text, 'vcdb')}}"
+          onblur="save_tag(this.id)"
+          class="vcdb"
+      >{{Isolist.hide_none(iso.find('vcdb').text)}}</td>
+      <td contenteditable="true" 
+          id="{{'{0}_{1}'.format(iso.find('file_name').text, 'pcdb')}}"
+          onblur="save_tag(this.id)"
+          class="pcdb"
+      >{{Isolist.hide_none(iso.find('pcdb').text)}}</td>
+      <td contenteditable="true" 
+          id="{{'{0}_{1}'.format(iso.find('file_name').text, 'uvcdb')}}"
+          onblur="save_tag(this.id)"
+          class="uvcdb"
+      >{{Isolist.hide_none(iso.find('uvcdb').text)}}</td>
+      <td contenteditable="true" 
+          id="{{'{0}_{1}'.format(iso.find('file_name').text, 'upcdb')}}"
+          onblur="save_tag(this.id)"
+          class="upcdb"
+      >{{Isolist.hide_none(iso.find('upcdb').text)}}</td>
+      <td contenteditable="true" 
+          id="{{'{0}_{1}'.format(iso.find('file_name').text, 'expcdb')}}"
+          onblur="save_tag(this.id)"
+          class="expcdb"
+      >{{Isolist.hide_none(iso.find('expcdb').text)}}</td>
+      <td contenteditable="true" 
+          id="{{'{0}_{1}'.format(iso.find('file_name').text, 'ecdb')}}"
+          onblur="save_tag(this.id)"
+          class="ecdb"
+      >{{Isolist.hide_none(iso.find('ecdb').text)}}</td>
+      <td contenteditable="true" 
+          id="{{'{0}_{1}'.format(iso.find('file_name').text, 'stcdb')}}"
+          onblur="save_tag(this.id)"
+          class="stcdb"
+      >{{Isolist.hide_none(iso.find('stcdb').text)}}</td>
+      <td contenteditable="true" 
+          id="{{'{0}_{1}'.format(iso.find('file_name').text, 'dtmt')}}"
+          onblur="save_tag(this.id)"
+          class="dtmt"
+      >{{Isolist.hide_none(iso.find('dtmt').text)}}</td>
+      <td contenteditable="true" 
+          id="{{'{0}_{1}'.format(iso.find('file_name').text, 'comment')}}"
+          onblur="save_tag(this.id)"
+          onkeypress="editable_jira_links(true)"
+          class="comment"
+      >{{Isolist.proc_jira(Isolist.hide_none(iso.find('comment').text))}}</td>
       
       </tr>
     {% endfor %}
+
   </table>
+
+  <h2>To do:</h2>
+  Jenkins integration<br>
+  Reduce number of ISOs per page
+
 
 
 
