@@ -10,7 +10,7 @@ global iso_tree_list
 global app_directory
 global data_directory
 
-@app.route('/')
+@app.route('/isolist/')
 def index():
     """
     This controller method provides the logic behind displaying the isolist.html view
@@ -174,3 +174,6 @@ class Isolist(object):
         issueName = m.group(0)
         return '<a contenteditable="false" class="jira_link" href="http://jira-oss.lmera.ericsson.se/browse/' + issueName.upper() + '">' + issueName + '</a>'
 
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0")
