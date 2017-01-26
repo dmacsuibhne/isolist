@@ -1,3 +1,4 @@
+{# This is a jinja template powered by the flask app isolist.py #}
 <!doctype html>
 <head>
   <title>ISOList</title>
@@ -99,8 +100,10 @@
 
   {% if view_type != "all" %}
     <p>
-      <a href="/isolist/{{ start - length }}/{{ length }}">Previous Page</a>
-      |
+      {% if start - length >= 0 %}
+        <a href="/isolist/{{ start - length }}/{{ length }}">Previous Page</a>
+        |
+      {% endif %}
       <a href="/isolist/{{ start + length }}/{{ length }}">Next Page</a>
     </p>
 
