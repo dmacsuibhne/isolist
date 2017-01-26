@@ -97,10 +97,23 @@
 
   </table>
 
-  <h2>To do:</h2>
-  Jenkins integration<br>
-  Reduce number of ISOs per page
+  {% if view_type != "all" %}
+    <p>
+      <a href="/isolist/{{ start - length }}/{{ length }}">Previous Page</a>
+      |
+      <a href="/isolist/{{ start + length }}/{{ length }}">Next Page</a>
+    </p>
 
+    <p>
+      <a href="/isolist/all/">Show all</a>
+    </p>
+  {% endif %}
+
+  {% if view_type == "all" %}
+    <p>
+      <a href="/isolist/">Normal view</a>
+    </p>
+  {% endif %}
 
 
 

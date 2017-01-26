@@ -3,7 +3,7 @@ body { color:#000; background:#FFF; font:83% sans-serif; text-align:center; }
 #body-wrap { width:100%; }
 a { color:#00F; }
 th { text-align:center; background-color:#FFF; }
-th, td { border:1px solid #CCC; padding:0; }
+th, td { border:1px solid #CCC; padding:5; }
 table { margin:0; padding:0; border-collapse:collapse; font-size:100%; overflow:hidden;}
 
 

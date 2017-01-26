@@ -5,47 +5,42 @@ import re
 
 app = Flask(__name__)
 
-# Global variables so that index and add_entry can share
-global iso_tree_list
-global app_directory
-global data_directory
+def get_data_directory():
+    """
+    Defines and returns the location of xml data files
+    """
+    # get directory names
+    app_directory=os.path.dirname(os.path.realpath(__file__))
+    data_directory="{0}/{1}".format(app_directory,"../data/2.x_extended_info/")
 
-@app.route('/isolist/')
-def index():
+    return data_directory
+
+
+@app.route('/isolist/', defaults = {'start': 0, 'length': 50, 'view_type': "normal" })
+@app.route('/isolist/all/', defaults = {'start': 0, 'length': 99999, 'view_type': "all" })
+@app.route('/isolist/<int:start>/<int:length>/', defaults = {'view_type': "normal" })
+def index(start, length, view_type):
     """
     This controller method provides the logic behind displaying the isolist.html view
     """
 
-    # Global vars to use
-    global iso_tree_list
-    global app_directory
-    global data_directory
+    # Read XML data
+    iso_tree_list, iso_root_list = Isolist.parse_xml()
 
-    #get directory names
-    app_directory=os.path.dirname(os.path.realpath(__file__))
-    data_directory="{0}/{1}".format(app_directory,"/data/")
-
-    #Generate list of .xml filepaths
-    xml_filepath_list = Isolist.get_filepaths(data_directory)
-
-    #Read XML data
-    iso_tree_list, iso_root_list = Isolist.parse_xml(xml_filepath_list)
-
-    #Sort list by Last modified
-    # by_last_mod = lambda iso: iso.find('last_mod').text
+    # Sort list by Last modified
     iso_root_list = sorted(iso_root_list, reverse=True, key = lambda iso: iso.find('last_mod').text)
 
-    return render_template('isolist.html', iso_list=iso_root_list, Isolist=Isolist)
+    #Return template and variables it requires
+    return render_template('isolist.html', iso_list=iso_root_list[start:(start + length)], Isolist=Isolist, start=start, length=length, view_type=view_type)
 
 @app.route('/save_tag', methods=['POST'])
 def add_entry():
     """
     Handle XML edits when cells are edited
     """
-    #Global vars to use
-    global iso_tree_list
-    global app_directory
-    global data_directory
+
+    # Read XML data
+    iso_tree_list, iso_root_list = Isolist.parse_xml()
 
     # Assign variables to posted data
     file_name = request.form['file_name']
@@ -66,13 +61,26 @@ def add_entry():
                 element.text = value
 
             # Write changes to file
-            iso_tree.write("{0}{1}.xml".format(data_directory, file_name))
+            iso_tree.write("{0}{1}.xml".format(get_data_directory(), file_name))
 
             break
 
 
     # Empty response
     return ('', 204)
+
+@app.route('/isolist/shutdown/', methods=['GET', 'POST'])
+def shutdown():
+    """
+    For shutting down the flask server conveniently. Based on 
+    http://flask.pocoo.org/snippets/67/
+    """
+
+    func = request.environ.get('werkzeug.server.shutdown')
+    if func is None:
+        raise RuntimeError('Not running with the Werkzeug Server')
+    func()
+    return 'Isolist app shutting down. To restart, run the command "python {0}/isolist.py & disown"'.format(os.path.dirname(os.path.realpath(__file__)))
 
 class Isolist(object):
     """
@@ -97,11 +105,15 @@ class Isolist(object):
         return file_path_list  # Self-explanatory.
 
     @staticmethod
-    def parse_xml(xml_filepath_list):
+    def parse_xml():
         """
         Parses all xml files in data folder. For meaning of tree 
         and root see the documentation for xml.etree.ElementTree
         """
+
+        # Generate list of .xml filepaths
+        xml_filepath_list = Isolist.get_filepaths(get_data_directory())
+
         tree_list = []
         root_list = []
         for file in xml_filepath_list:
@@ -136,8 +148,7 @@ class Isolist(object):
         """
         For the isos that are available on .30, the filename should be a hyperlink to the download
         """
-        # iso_location="/home/admin/iso_files/2.x/"
-        iso_location="/home/donnchadh.macsuibhne/Downloads/"
+        iso_location="/home/admin/iso_files/2.x/" 
         iso_link_location="http://10.44.86.30/iso/2.x/"
 
         if os.path.exists("".join((iso_location,file_name))):
@@ -176,4 +187,4 @@ class Isolist(object):
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0")
+    app.run(host="0.0.0.0", port=8000, threaded=True)
